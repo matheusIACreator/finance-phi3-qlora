@@ -1,0 +1,31 @@
+# QLoRA Configuration
+# Used with: peft >= 0.12.0, bitsandbytes >= 0.43.3
+
+# ── LoRA Adapter ─────────────────────────────────────────────
+lora:
+  r: 16                        # LoRA rank — higher = more capacity, more VRAM
+  lora_alpha: 32               # scaling factor (alpha / r = 2.0)
+  lora_dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+# ── 4-bit Quantization ───────────────────────────────────────
+quantization:
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"          # NormalFloat4 — best for normally distributed weights
+  bnb_4bit_compute_dtype: "bfloat16"  # bf16 for compute (T4 supports it)
+  bnb_4bit_use_double_quant: true     # double quantization — saves ~0.4 bits/param extra
+
+# ── Model ────────────────────────────────────────────────────
+model:
+  name: "microsoft/Phi-3-mini-4k-instruct"
+  device_map: "auto"
+  trust_remote_code: true

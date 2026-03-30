@@ -33,14 +33,15 @@ def load_model():
         BASE_MODEL,
         quantization_config=bnb_config,
         device_map="auto",
-        trust_remote_code=True,
+        trust_remote_code=False,
+        attn_implementation="eager",
     )
 
     print(f"Applying LoRA adapters from: {ADAPTER_PATH}")
     model = PeftModel.from_pretrained(base, ADAPTER_PATH)
     model.eval()
 
-    tokenizer = AutoTokenizer.from_pretrained(ADAPTER_PATH, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(ADAPTER_PATH, trust_remote_code=False)
 
     print("✓ Model ready.")
     return model, tokenizer
@@ -59,7 +60,7 @@ def generate_answer(question: str, model, tokenizer) -> str:
         "<|assistant|>\n"
     )
 
-    inputs = tokenizer(prompt, return_tensors="pt").to(DEVICE)
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
     with torch.no_grad():
         outputs = model.generate(
